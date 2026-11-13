@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Secrets
+.env
+backend/.env
+.env.*
+!.env.example
+
+# Node / frontend
+node_modules/
+frontend/dist/
+
+# Data and uploads
+data/contracts/*
+data/sample_contracts/*
+!data/**/.gitkeep
+
+# OS / IDE
+.DS_Store
+.idea/
