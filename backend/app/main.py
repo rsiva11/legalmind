@@ -1,23 +1,23 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 
+from app.api.router import api_router
+from app.api.v1 import health
 from app.config import get_settings
-from app.database.mongodb import (
-    close_mongo_connection,
-    connect_to_mongo,
-    ping_database,
-)
+from app.database.mongodb import close_mongo_connection, connect_to_mongo
 
+from app.core.logging import setup_logging
+
+setup_logging()
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await connect_to_mongo()      # runs on startup
+    await connect_to_mongo()
     yield
-    await close_mongo_connection()  # runs on shutdown
+    await close_mongo_connection()
 
 
 app = FastAPI(
@@ -27,14 +27,5 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
-@app.get("/health", tags=["system"])
-async def health():
-    db_ok = await ping_database()
-    body = {
-        "status": "ok" if db_ok else "degraded",
-        "app": settings.app_name,
-        "environment": settings.app_env,
-        "database": "up" if db_ok else "down",
-    }
-    return JSONResponse(body, status_code=200 if db_ok else 503)
+app.include_router(health.router)      # /health (unversioned, for infra)
+app.include_router(api_router)         # /api/v1/... (business endpoints)

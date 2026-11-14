@@ -23,3 +23,6 @@ data/sample_contracts/*
 # OS / IDE
 .DS_Store
 .idea/
+
+backend/uploads/
+uploads/

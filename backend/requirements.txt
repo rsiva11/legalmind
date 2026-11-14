@@ -1,3 +1,6 @@
 fastapi
 uvicorn[standard]
 pydantic-settings
+python-multipart
+regex<2026.11
+groq

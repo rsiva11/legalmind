@@ -14,6 +14,33 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     jwt_secret_key: str = ""
 
+    upload_dir: str = "uploads"
+    max_upload_mb: int = 10
+    allowed_extensions: list[str] = [".pdf", ".docx", ".txt"]
+
+    chunk_max_chars: int = 1200
+    chunk_overlap_chars: int = 150
+
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_dimensions: int = 384
+    embedding_batch_size: int = 32
+
+    chunks_collection: str = "chunks"
+    vector_index_name: str = "chunk_vector_index"
+
+    retrieval_top_k: int = 5
+    retrieval_min_score: float = 0.0
+
+    context_max_chars: int = 6000
+
+    groq_model: str = "openai/gpt-oss-120b"
+    groq_timeout_seconds: float = 30.0
+    groq_max_retries: int = 2
+    llm_temperature: float = 0.1
+    llm_max_tokens: int = 1024
+
+    request_token_budget: int = 20000
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
