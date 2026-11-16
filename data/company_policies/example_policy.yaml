@@ -1,0 +1,39 @@
+# EXAMPLE rules for development only. These are NOT legal or regulatory requirements.
+# Replace with your real company policy, with a real source on each rule.
+- id: EX-001
+  name: Termination notice of at least 30 days
+  source: "EXAMPLE policy (replace with your real policy)"
+  check: duration_at_least
+  field: termination_notice
+  value: { amount: 30, unit: days }
+  severity: high
+
+- id: EX-002
+  name: Payment terms are stated
+  source: "EXAMPLE policy (replace with your real policy)"
+  check: field_present
+  field: payment_terms
+  severity: medium
+
+- id: EX-003
+  name: Governing law is an approved jurisdiction
+  source: "EXAMPLE policy (replace with your real policy)"
+  check: value_in_list
+  field: governing_law
+  value: ["India", "England and Wales"]
+  severity: medium
+
+- id: EX-004
+  name: Confidentiality clause is present
+  source: "EXAMPLE policy (replace with your real policy)"
+  check: clause_present
+  clause_type: confidentiality
+  severity: high
+
+- id: EX-005
+  name: Payment due within at most 60 days
+  source: "EXAMPLE policy (replace with your real policy)"
+  check: duration_at_most
+  field: payment_terms
+  value: { amount: 60, unit: days }
+  severity: low

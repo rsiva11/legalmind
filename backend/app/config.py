@@ -41,6 +41,13 @@ class Settings(BaseSettings):
 
     request_token_budget: int = 20000
 
+    policies_dir: str = "../data/company_policies"
+
+    risk_rules_dir: str = "../data/risk_rules"
+    risk_threshold_medium: int = 20
+    risk_threshold_high: int = 40
+    risk_threshold_critical: int = 70
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
