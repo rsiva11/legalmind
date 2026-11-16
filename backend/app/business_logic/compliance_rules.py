@@ -10,6 +10,8 @@ from app.agents.contract.schemas import ContractAnalysis
 from app.config import get_settings
 from app.schemas.compliance import ComplianceFinding, ComplianceRule, DurationValue
 
+from app.utils.text_utils import NUMBER_WORDS as _WORDS
+
 logger = logging.getLogger(__name__)
 
 NOT_FOUND_DETAIL = (
@@ -19,11 +21,7 @@ NOT_FOUND_DETAIL = (
 
 # 12 months == 1 year exactly, so equivalent wording compares as equal
 _UNIT_DAYS = {"day": 1.0, "week": 7.0, "month": 365.25 / 12, "year": 365.25}
-_WORDS = {
-    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
-    "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "fifteen": 15,
-    "twenty": 20, "thirty": 30, "sixty": 60, "ninety": 90,
-}
+
 _QUALIFIER = r"(business\s+|working\s+|calendar\s+)?"
 _UNIT = r"(day|week|month|year)s?\b"
 _DIGITS = re.compile(rf"(\d+(?:\.\d+)?)\)?\s*{_QUALIFIER}{_UNIT}", re.I)
@@ -88,7 +86,7 @@ def evaluate_rule(rule: ComplianceRule, analysis: ContractAnalysis) -> Complianc
         return make("not_found", NOT_FOUND_DETAIL)
 
     if rule.check == "field_present":
-        return make("compliant", f"{rule.field} was found", fact.evidence)
+        return make("compliant", f"{rule.field.replace('_', ' ')} was found", fact.evidence)
 
     if rule.check == "value_in_list":
         for allowed in rule.value:
@@ -110,7 +108,7 @@ def evaluate_rule(rule: ComplianceRule, analysis: ContractAnalysis) -> Complianc
     else:
         ok, word = days <= required + 1e-6, "at most"
     detail = f"Found '{fact.value}' ({days:g} days); requires {word} {required:g} days"
-    return make("compliant", f"{rule.field.replace('_', ' ')} was found", fact.evidence)
+    return make("compliant" if ok else "non_compliant", detail, fact.evidence)
 
 
 def evaluate(analysis: ContractAnalysis, rules: list[ComplianceRule]) -> list[ComplianceFinding]:

@@ -11,7 +11,7 @@ from app.agents.summary.schemas import (
     SummaryLine,
     SummaryReport,
 )
-from app.agents.verification.agent import numbers_in  # belongs in utils; moved when a third user appears
+from app.utils.text_utils import numbers_in  # belongs in utils; moved when a third user appears
 from app.agents.verification.schemas import VerificationReport
 from app.business_logic.scoring_engine import score_risks
 from app.knowledge.citation_manager import extract_citations

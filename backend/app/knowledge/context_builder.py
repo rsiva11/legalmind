@@ -2,8 +2,8 @@ from app.config import get_settings
 from app.schemas.document import BuiltContext, EvidenceItem, RetrievalResult
 
 
-def build_context(result: RetrievalResult) -> BuiltContext:
-    budget = get_settings().context_max_chars
+def build_context(result: RetrievalResult, max_chars: int | None = None) -> BuiltContext:
+    budget = max_chars or get_settings().context_max_chars
     evidence: list[EvidenceItem] = []
     blocks: list[str] = []
     used = 0

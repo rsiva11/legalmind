@@ -15,25 +15,16 @@ from app.agents.verification.schemas import (
     VerificationIssue,
     VerificationReport,
 )
-from app.business_logic.compliance_rules import _WORDS, evaluate, load_rules
+from app.business_logic.compliance_rules import evaluate, load_rules
 from app.business_logic.risk_rules import evaluate_risks, load_risk_rules
 from app.business_logic.scoring_engine import score_risks
-from app.utils.text_utils import norm
+from app.utils.text_utils import norm, numbers_in
 
 logger = logging.getLogger(__name__)
 
 FACT_FIELDS = ("effective_date", "term_or_expiry", "termination_notice", "payment_terms", "governing_law")
 MAX_OUTPUT_TOKENS = 3000
 _RANK = {"supported": 0, "unclear": 1, "unsupported": 2}
-
-_DIGITS = re.compile(r"\d+(?:,\d{3})*(?:\.\d+)?")
-_WORD_NUM = re.compile(r"\b(" + "|".join(_WORDS) + r")\b", re.I)
-
-
-def numbers_in(text: str) -> set[float]:
-    found = {float(m.group(0).replace(",", "")) for m in _DIGITS.finditer(text)}
-    found |= {float(_WORDS[m.group(1).lower()]) for m in _WORD_NUM.finditer(text)}
-    return found
 
 
 @dataclass

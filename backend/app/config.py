@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     risk_threshold_high: int = 40
     risk_threshold_critical: int = 70
 
+    analysis_top_k_per_query: int = 3
+    analysis_context_max_chars: int = 12000
+    analysis_token_budget: int = 40000
+
+    jobs_collection: str = "jobs"
+    workflow_timeout_seconds: float = 300.0
+    max_concurrent_jobs: int = 2
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
