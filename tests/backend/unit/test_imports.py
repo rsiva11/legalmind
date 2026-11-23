@@ -31,6 +31,14 @@ MODULES = [
     "app.guardrails.prompt_injection",
     "app.guardrails.pii_guardrail",
     "app.guardrails.input_guardrail",
+    "app.guardrails.document_guardrail",
+    "app.guardrails.retrieval_guardrail",
+    "app.guardrails.compliance_guardrail",
+    "app.guardrails.risk_guardrail",
+    "app.guardrails.tool_guardrail",
+    "app.business_logic.contract_rules",
+    "app.business_logic.escalation_rules",
+    "app.business_logic.recommendation_engine",
 ]
 
 

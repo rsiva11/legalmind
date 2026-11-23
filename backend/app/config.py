@@ -56,6 +56,20 @@ class Settings(BaseSettings):
     workflow_timeout_seconds: float = 300.0
     max_concurrent_jobs: int = 2
 
+    tool_max_calls_per_request: int = 5
+    tool_timeout_seconds: float = 10.0
+
+    escalation_min_risk_coverage: float = 0.5
+    escalation_max_unresolved_share: float = 0.5
+
+    knowledge_dir: str = "../data/legal_knowledge"
+    knowledge_collection: str = "knowledge_chunks"
+    knowledge_vector_index_name: str = "knowledge_vector_index"
+    knowledge_allowed_jurisdictions: list[str] = ["India"]
+    knowledge_top_k: int = 4
+    knowledge_min_score: float = 0.0
+    knowledge_context_max_chars: int = 6000
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

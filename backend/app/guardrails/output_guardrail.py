@@ -4,6 +4,8 @@ from typing import Literal
 from app.guardrails.result import GuardrailFinding
 from app.utils.text_utils import norm
 
+from app.guardrails.pii_guardrail import find_pii
+
 NAME = "output"
 Profile = Literal["general", "document", "commentary"]
 
@@ -29,7 +31,7 @@ PREDICTION = _compile(
 )
 IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 URL = re.compile(r"(?:https?://|www\.)[^\s)\]>\"']+", re.I)
-LABEL = re.compile(r"\[(E\d+)\]")
+LABEL = re.compile(r"\[([EK]\d+)\]")
 
 # code -> (message when blocked, message when only flagged)
 _MESSAGES = {
@@ -55,6 +57,14 @@ def _in_source(phrase: str, source_norm: str) -> bool:
         return False
     return re.search(rf"(?<!\w){re.escape(norm(phrase))}(?!\w)", source_norm) is not None
 
+
+def _pii_in_source(value: str, source: str) -> bool:
+    if not source:
+        return False
+    if norm(value) in norm(source):
+        return True
+    digits = re.sub(r"\D", "", value)  # "4111 1111" in the answer vs "41111111" in the source
+    return len(digits) >= 9 and digits in re.sub(r"\D", "", source)
 
 def check_text(
     field: str,
@@ -95,4 +105,37 @@ def check_text(
             findings.append(
                 _finding("unknown_citation", field, "block", "Cites evidence that was not provided: " + ", ".join(bad))
             )
+
+    leaked = sorted({m.kind for m in find_pii(text) if not _pii_in_source(text[m.start : m.end], source)})
+    if leaked:
+        findings.append(
+            _finding(
+                "pii_in_output", field, "flag",
+                "Contains personal identifier(s) not found in the source text: " + ", ".join(leaked),
+            )
+        )
     return findings
+
+EXPLANATION_FALLBACK = "Explanation withheld by an automated safety check. Review this finding manually."
+ACTION_FALLBACK = "Suggested action withheld by an automated safety check. Review this finding manually."
+
+
+def screen_replace(
+    guardrail: str, field: str, text: str | None, fallback: str, source: str
+) -> tuple[str | None, list[GuardrailFinding], bool]:
+    """Screen one model-written text. A block replaces it with a fixed message.
+    Flags are kept as findings. Returns (text, findings, replaced)."""
+    if not text or not text.strip():
+        return text, [], False
+    findings = check_text(field, text, "commentary", source)
+    blocking = sorted({f.code for f in findings if f.action == "block"})
+    kept = [f.model_copy(update={"guardrail": guardrail}) for f in findings if f.action != "block"]
+    if not blocking:
+        return text, kept, False
+    kept.append(
+        GuardrailFinding(
+            guardrail=guardrail, action="flag", code="text_replaced", field=field,
+            detail="Model-written text was replaced with a fixed message; reason: " + ", ".join(blocking),
+        )
+    )
+    return fallback, kept, True

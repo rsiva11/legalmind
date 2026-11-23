@@ -7,6 +7,11 @@ from app.schemas.document import BuiltContext
 
 from app.guardrails.input_guardrail import InputCheck, check_request
 
+from app.guardrails.compliance_guardrail import screen_compliance_report
+from app.guardrails.risk_guardrail import screen_risk_report
+
+from app.guardrails.tool_guardrail import ToolGuardrail, ToolSession
+
 
 @dataclass
 class OutputItem:
@@ -23,11 +28,15 @@ def collect_output_items(state: WorkflowState, context: BuiltContext | None) -> 
     labels = set(evidence) if context else None
     items: list[OutputItem] = []
 
-    if state.legal_answer is not None:
-        la = state.legal_answer
-        items.append(OutputItem("legal_answer.answer", la.answer, "general"))
+    la = state.legal_answer
+    if la is not None and la.status in ("answered", "out_of_scope"):  # not_found and unverified are fixed strings
+        passages = state.research.passages if state.research is not None else None
+        source = " ".join(p.text for p in passages) if passages else ""
+        k_labels = {p.label for p in passages} if passages is not None else None
+        items.append(OutputItem("legal_answer.answer", la.answer, "general", source, k_labels))
         items += [
-            OutputItem(f"legal_answer.key_points[{i}]", p, "general") for i, p in enumerate(la.key_points)
+            OutputItem(f"legal_answer.key_points[{i}]", p, "general", source, k_labels)
+            for i, p in enumerate(la.key_points)
         ]
 
     da = state.document_answer
@@ -69,5 +78,17 @@ class GuardrailManager:
             findings += check_text(item.field, item.text, item.profile, item.source, item.labels)
         return GuardrailResult(guardrail=NAME, findings=findings)
 
+    def __init__(self, tools: ToolGuardrail | None = None) -> None:
+        self.tools = tools if tools is not None else ToolGuardrail()
+
+    def tool_session(self, agent: str, document_id: str | None = None) -> ToolSession:
+        return self.tools.session(agent, document_id)
+
     def check_input(self, question: str | None, document_id: str | None) -> InputCheck:
         return check_request(question, document_id)
+
+    def screen_compliance(self, report):
+        return screen_compliance_report(report)
+
+    def screen_risk(self, report):
+        return screen_risk_report(report)

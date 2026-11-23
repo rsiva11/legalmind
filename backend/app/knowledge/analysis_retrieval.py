@@ -61,12 +61,18 @@ async def retrieve_for_analysis(
             if c.score > entry["best"]:
                 entry["best"], entry["chunk"] = c.score, c
 
+    # The same bad chunk can come back for several queries: report it once
+    findings = list(
+        {(f.code, f.field, f.action): f for res in results for f in res.guardrail_findings}.values()
+    )
+
     # Most-matched chunks first, so budget cuts drop the least-matched ones
     ordered = sorted(merged.values(), key=lambda e: (-e["hits"], -e["best"], e["chunk"].chunk_index))
     chunks = [e["chunk"] for e in ordered]
     logger.info("Analysis retrieval: %d queries, %d unique chunks", len(queries), len(chunks))
-    return RetrievalResult(question="full analysis", found=bool(chunks), chunks=chunks)
-
+    return RetrievalResult(
+        question="full analysis", found=bool(chunks), chunks=chunks, guardrail_findings=findings
+    )
 
 async def build_analysis_context(document_id: str, **kwargs) -> BuiltContext:
     result = await retrieve_for_analysis(document_id, **kwargs)

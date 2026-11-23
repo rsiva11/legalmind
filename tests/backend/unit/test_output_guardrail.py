@@ -122,3 +122,23 @@ def test_result_action_is_the_worst_finding():
     assert GuardrailResult(guardrail="output").action == "allow"
     assert GuardrailResult(guardrail="output", findings=[finding("flag")]).action == "flag"
     assert GuardrailResult(guardrail="output", findings=[finding("flag"), finding("block")]).action == "block"
+
+def test_identifier_not_in_the_source_is_flagged():
+    out = check_text("f", "Contact jane@example.com for details.", "commentary")
+    assert codes(out) == [("pii_in_output", "flag")]
+    assert out[0].detail == "Contains personal identifier(s) not found in the source text: email"
+    assert "jane" not in out[0].detail
+
+
+def test_identifier_present_in_the_source_is_allowed():
+    assert check_text("f", "Contact jane@example.com.", "document", "Notices go to Jane@Example.com") == []
+
+
+def test_identifier_formatting_differences_are_tolerated():
+    out = check_text("f", "Card 4111 1111 1111 1111 was used.", "commentary", "Payment card 4111111111111111 on file")
+    assert out == []
+
+
+def test_several_identifier_kinds_are_listed_sorted():
+    out = check_text("f", "Reach jane@example.com, PAN ABCPE1234F.", "commentary")
+    assert out[0].detail.endswith("not found in the source text: email, pan")

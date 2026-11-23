@@ -29,4 +29,9 @@ def build_context(result: RetrievalResult, max_chars: int | None = None) -> Buil
         )
 
     text = "<evidence>\n" + "\n\n".join(blocks) + "\n</evidence>" if blocks else ""
-    return BuiltContext(text=text, evidence=evidence, truncated=truncated)
+    return BuiltContext(
+        text=text,
+        evidence=evidence,
+        truncated=truncated,
+        guardrail_findings=list(result.guardrail_findings),
+    )

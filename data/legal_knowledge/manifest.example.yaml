@@ -1,0 +1,37 @@
+# Copy to manifest.yaml and replace every REPLACE value. Keep terms_verified: false until YOU have
+# read the publisher's terms of use; the loader refuses sources with terms_verified: false.
+version: 1
+sources:
+  - id: indian-contract-act-1872
+    title: "The Indian Contract Act, 1872"
+    file: indian-contract-act-1872.pdf
+    sha256: "REPLACE: output of --print-hashes"
+    jurisdiction: India
+    publisher: "Government of India (India Code)"
+    source_url: "https://indiacode.nic.in/handle/123456789/2187"
+    retrieved_on: "REPLACE: YYYY-MM-DD"
+    version_note: "REPLACE: the 'as on' date on the PDF cover, if any"
+    terms_note: "REPLACE: what the site's copyright or terms page says, and its URL"
+    terms_verified: false
+  - id: arbitration-and-conciliation-act-1996
+    title: "The Arbitration and Conciliation Act, 1996"
+    file: arbitration-and-conciliation-act-1996.pdf
+    sha256: "REPLACE: output of --print-hashes"
+    jurisdiction: India
+    publisher: "Government of India (India Code)"
+    source_url: "https://indiacode.nic.in/handle/123456789/1978"
+    retrieved_on: "REPLACE: YYYY-MM-DD"
+    version_note: "REPLACE: the 'as on' date on the PDF cover, if any"
+    terms_note: "REPLACE: what the site's copyright or terms page says, and its URL"
+    terms_verified: false
+  - id: dpdp-act-2023
+    title: "The Digital Personal Data Protection Act, 2023"
+    file: dpdp-act-2023.pdf
+    sha256: "REPLACE: output of --print-hashes"
+    jurisdiction: India
+    publisher: "Government of India (India Code)"
+    source_url: "https://www.indiacode.nic.in/handle/123456789/22037"
+    retrieved_on: "REPLACE: YYYY-MM-DD"
+    version_note: "REPLACE: the 'as on' date on the PDF cover; commencement is staged, so check the Gazette"
+    terms_note: "REPLACE: what the site's copyright or terms page says, and its URL"
+    terms_verified: false

@@ -14,6 +14,10 @@ from app.agents.verification.schemas import VerificationReport
 
 from app.guardrails.result import GuardrailFinding
 
+from app.business_logic.recommendation_engine import Recommendation
+
+from app.agents.research.schemas import ResearchResult
+
 Workflow = Literal["legal_question", "document_qa", "full_analysis"]
 
 
@@ -52,6 +56,7 @@ class WorkflowState(BaseModel):
 
     # Results, filled in by the workflows
     legal_answer: LegalAnswer | None = None
+    research: ResearchResult | None = None
     document_answer: DocumentAnswer | None = None
     contract: ContractAnalysis | None = None
     compliance: ComplianceReport | None = None
@@ -62,6 +67,8 @@ class WorkflowState(BaseModel):
     # Placeholder until Phase 9/10 (escalation and human review)
     needs_human_review: bool = False
     review_reasons: list[str] = []
+    review_codes: list[str] = []  # fixed codes behind review_reasons, in a stable order
+    recommendations: list[Recommendation] = []
 
     @classmethod
     def start(cls, request: WorkflowRequest, decision: RouteDecision) -> "WorkflowState":

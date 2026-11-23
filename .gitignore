@@ -26,3 +26,8 @@ data/sample_contracts/*
 
 backend/uploads/
 uploads/
+
+data/legal_knowledge/*
+!data/legal_knowledge/manifest.yaml
+!data/legal_knowledge/manifest.example.yaml
+!data/legal_knowledge/.gitkeep

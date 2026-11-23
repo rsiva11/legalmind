@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.guardrails.result import GuardrailFinding
+
 
 class DocumentUploadResponse(BaseModel):
     document_id: str
@@ -45,6 +47,9 @@ class IngestionResult(BaseModel):
     chunk_count: int
     needs_ocr: bool
     chunks: list[Chunk]
+    withheld_count: int = 0
+    needs_review: bool = False
+    guardrail_findings: list[GuardrailFinding] = []
 
 class RetrievedChunk(BaseModel):
     document_id: str
@@ -59,6 +64,8 @@ class RetrievalResult(BaseModel):
     question: str
     found: bool
     chunks: list[RetrievedChunk]
+    guardrail_findings: list[GuardrailFinding] = []
+
 
 class EvidenceItem(BaseModel):
     label: str
@@ -73,6 +80,8 @@ class BuiltContext(BaseModel):
     text: str
     evidence: list[EvidenceItem]
     truncated: bool
+    guardrail_findings: list[GuardrailFinding] = []
+
 
 class Citation(BaseModel):
     label: str

@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+from app.guardrails.document_guardrail import scan_chunks
 from app.ingestion.chunker import chunk_document
 from app.ingestion.document_loader import load_document
 from app.ingestion.metadata_extractor import enrich_chunks
@@ -23,12 +24,21 @@ def ingest_document(path: Path) -> IngestionResult:
     if not chunks:
         raise ValueError("No text could be extracted from the document")
 
-    logger.info("Ingested pages=%d chunks=%d", parsed.page_count, len(chunks))
+    scan = scan_chunks(chunks)
+    if not scan.kept:
+        raise ValueError("All content was withheld by the document guardrail")
+
+    logger.info(
+        "Ingested pages=%d chunks=%d withheld=%d", parsed.page_count, len(scan.kept), scan.withheld
+    )
 
     return IngestionResult(
         source_path=str(path),
         page_count=parsed.page_count,
-        chunk_count=len(chunks),
+        chunk_count=len(scan.kept),
         needs_ocr=parsed.needs_ocr,
-        chunks=chunks,
+        chunks=scan.kept,
+        withheld_count=scan.withheld,
+        needs_review=scan.needs_review,
+        guardrail_findings=scan.findings,
     )
