@@ -15,6 +15,8 @@ from app.orchestration.state import WorkflowRequest, WorkflowState
 from app.orchestration.workflow import WorkflowDeps, run_workflow
 from app.schemas.document import BuiltContext, RAGResult
 
+from app.agents.research.schemas import ResearchResult
+
 CTX = make_context()
 MODES = ("contract", "compliance", "risk", "verification", "summary")
 
@@ -103,15 +105,19 @@ def test_legal_question_workflow():
         in_scope=True, answer="x", key_points=[], jurisdiction_dependent=False,
         seek_professional_advice=False, disclaimer="d",
     )
+    research = Fake("research", ResearchResult(status="not_found"))
     legal = Fake("legal_assistant", answer, tokens=120, calls=1)
     rag, ctxf = FakeRetrieval(), FakeRetrieval()
-    state = run(start(question="What is an NDA?"), WorkflowDeps(legal=legal, rag=rag, analysis_context=ctxf))
+    state = run(
+        start(question="What is an NDA?"),
+        WorkflowDeps(research=research, legal=legal, rag=rag, analysis_context=ctxf),
+    )
     assert state.status == "completed" and state.legal_answer == answer
     assert legal.inputs[0].question == "What is an NDA?"
-    assert rag.calls == [] and ctxf.calls == []  # a general question never touches documents
+    assert rag.calls == [] and ctxf.calls == []  # a general question never touches contract documents
     assert legal.budgets == [get_settings().request_token_budget]
     assert (state.total_tokens, state.total_llm_calls) == (120, 1)
-
+    assert [s.agent for s in state.steps] == ["research", "legal_assistant"]
 
 def test_full_analysis_happy_path():
     deps = full_deps()

@@ -16,6 +16,11 @@ class StructuredOutputError(Exception):
     """The model never produced valid JSON for the requested schema."""
 
 
+class OutputTruncated(StructuredOutputError):
+    """The reply hit the output limit before the JSON was complete.
+    Retrying with the same limit would fail the same way, so we stop."""
+
+
 def _extract_json(text: str) -> dict:
     text = re.sub(r"^```(?:json)?\s*|\s*```$", "", text.strip())
     start, end = text.find("{"), text.rfind("}")
@@ -38,6 +43,14 @@ def _with_schema_instruction(messages: list[dict[str, str]], schema: type[BaseMo
     return out
 
 
+def _error_locations(exc: Exception) -> str:
+    """Where a schema check failed and why, never the offending values."""
+    if not isinstance(exc, ValidationError):
+        return ""
+    parts = [f"{'.'.join(str(p) for p in e['loc'])}:{e['type']}" for e in exc.errors()[:8]]
+    return " | errors=" + ", ".join(parts)
+
+
 async def chat_structured(
     messages: list[dict[str, str]],
     schema: type[T],
@@ -54,7 +67,13 @@ async def chat_structured(
             return schema.model_validate(_extract_json(result.text))
         except (ValueError, ValidationError) as exc:  # JSONDecodeError is a ValueError
             last_error = str(exc)[:500]
-            logger.warning("Structured output invalid (attempt %d/%d): %s", attempt, max_attempts, type(exc).__name__)
+            logger.warning(
+                "Structured output invalid (attempt %d/%d): %s | reply_chars=%d finish_reason=%s completion_tokens=%d%s",
+                attempt, max_attempts, type(exc).__name__, len(result.text), result.finish_reason,
+                result.completion_tokens, _error_locations(exc),
+            )
+            if result.finish_reason == "length":
+                raise OutputTruncated("The reply hit the output limit before the JSON was complete") from None
             convo = convo + [
                 {"role": "assistant", "content": result.text},
                 {
@@ -63,4 +82,5 @@ async def chat_structured(
                 },
             ]
 
-    raise StructuredOutputError(f"No valid output after {max_attempts} attempts: {last_error}")
+    # The message holds no model output: it can be logged safely
+    raise StructuredOutputError(f"No valid output after {max_attempts} attempts")

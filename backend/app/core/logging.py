@@ -22,4 +22,6 @@ def setup_logging() -> None:
     root.setLevel(level)
 
     # Keep noisy third-party loggers quieter
-    logging.getLogger("pymongo").setLevel(logging.WARNING)
+    for noisy in ("pymongo", "httpx", "httpx2", "httpcore", "httpcore2", "huggingface_hub",
+                  "sentence_transformers", "urllib3"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)

@@ -69,6 +69,10 @@ class Settings(BaseSettings):
     knowledge_top_k: int = 4
     knowledge_min_score: float = 0.0
     knowledge_context_max_chars: int = 6000
+    llm_reasoning_effort: str | None = None
+
+    groq_tpm_limit: int = 8000   # your account's tokens-per-minute limit; 0 turns the limiter off
+    groq_tpm_safety: float = 0.9  # use only this share of it, because token counts are estimates
 
     model_config = SettingsConfigDict(
         env_file=".env",

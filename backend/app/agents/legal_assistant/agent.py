@@ -22,7 +22,7 @@ UNVERIFIED_ANSWER = (
     "I could not verify an answer against the legal knowledge base. "
     "Please consult a qualified lawyer or the official source."
 )
-MAX_OUTPUT_TOKENS = 2000
+MAX_OUTPUT_TOKENS = 3500
 _LABEL = re.compile(r"\[(K\d+)\]")
 
 

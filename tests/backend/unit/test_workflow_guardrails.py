@@ -8,6 +8,8 @@ from app.guardrails.result import GuardrailFinding, GuardrailResult
 from app.orchestration.workflow import WorkflowDeps
 from app.schemas.document import Citation, RAGResult
 
+from app.agents.research.schemas import ResearchResult
+
 WITHHELD = "1 retrieved passage(s) were withheld as suspicious and not used"
 REPLACED = "1 model-written explanation or action text(s) were replaced by an automated safety check"
 DROPPED = "1 suggested risk(s) were dropped by an automated safety check"
@@ -128,8 +130,12 @@ def test_flagged_output_completes_with_a_warning():
 
 
 def test_guardrail_error_fails_closed():
+    research = Fake("research", ResearchResult(status="not_found"))
     legal = Fake("legal_assistant", legal_answer("A notice period is the time to give notice."), calls=1)
-    state = run(start(question="What is a notice period?"), WorkflowDeps(legal=legal, guardrails=Exploding()))
+    state = run(
+        start(question="What is a notice period?"),
+        WorkflowDeps(research=research, legal=legal, guardrails=Exploding()),
+    )
     assert (state.status, state.failed_step) == ("failed", "guardrail:output")
     assert state.legal_answer is None
     assert (state.steps[-1].agent, state.steps[-1].error_type) == ("guardrail:output", "RuntimeError")

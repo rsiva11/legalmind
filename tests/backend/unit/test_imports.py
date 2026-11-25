@@ -39,6 +39,15 @@ MODULES = [
     "app.business_logic.contract_rules",
     "app.business_logic.escalation_rules",
     "app.business_logic.recommendation_engine",
+
+    "app.schemas.knowledge",
+    "app.knowledge.knowledge_manifest",
+    "app.knowledge.knowledge_store",
+    "app.knowledge.knowledge_context",
+    "app.knowledge.knowledge_ingestion",
+    "app.knowledge.knowledge_retrieval",
+    "app.knowledge.knowledge_tools",
+    "app.agents.research.agent",
 ]
 
 

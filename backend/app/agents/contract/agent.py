@@ -16,7 +16,7 @@ from app.utils.text_utils import good_refs as _good_refs, norm as _norm
 
 logger = logging.getLogger(__name__)
 
-MAX_OUTPUT_TOKENS = 3000
+MAX_OUTPUT_TOKENS = 3500
 
 
 def _ground(extraction: ContractExtraction, context: BuiltContext) -> tuple[ContractExtraction, int]:

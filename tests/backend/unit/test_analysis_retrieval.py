@@ -1,12 +1,16 @@
 import asyncio
 from typing import get_args
 
+from app.config import get_settings
+
 from app.agents.contract.schemas import ClauseType
 from app.agents.verification.agent import FACT_FIELDS
 from app.knowledge.analysis_retrieval import (
     CLAUSE_QUERIES, FACT_QUERIES, build_analysis_context, retrieve_for_analysis,
 )
 from app.schemas.document import RetrievalResult, RetrievedChunk
+
+
 
 DISTINCT_QUERIES = set(FACT_QUERIES.values()) | set(CLAUSE_QUERIES.values())
 

@@ -142,3 +142,11 @@ def test_identifier_formatting_differences_are_tolerated():
 def test_several_identifier_kinds_are_listed_sorted():
     out = check_text("f", "Reach jane@example.com, PAN ABCPE1234F.", "commentary")
     assert out[0].detail.endswith("not found in the source text: email, pan")
+
+def test_knowledge_labels_are_checked():
+    ok = check_text("f", "Notice is 14 days [K1]. Fees follow [K2].", "general", "", {"K1", "K2"})
+    assert ok == []
+    bad = check_text("f", "Notice is 14 days [K1]. See [K9].", "general", "", {"K1", "K2"})
+    assert codes(bad) == [("unknown_citation", "block")] and "K9" in bad[0].detail
+    mixed = check_text("f", "Notice is 14 days [E1].", "general", "", {"K1"})
+    assert codes(mixed) == [("unknown_citation", "block")]
